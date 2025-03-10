@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyperspace Shooter</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        canvas {
+            display: block;
+        }
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            font-size: 18px;
+            text-shadow: 0 0 5px #00f, 0 0 10px #00f;
+            pointer-events: none;
+        }
+        #health-bar {
+            width: 200px;
+            height: 20px;
+            border: 2px solid #fff;
+            margin-top: 10px;
+            box-shadow: 0 0 5px #00f, 0 0 10px #00f;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #health-fill {
+            height: 100%;
+            width: 100%;
+            background-color: #0f0;
+            transition: width 0.3s;
+            border-radius: 8px;
+        }
+        #game-over, #game-win {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            font-size: 48px;
+            text-align: center;
+            display: none;
+            text-shadow: 0 0 10px #f00, 0 0 20px #f00;
+        }
+        #game-win {
+            text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+        }
+        #restart-button, #restart-button-win {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 24px;
+            background-color: rgba(0, 100, 255, 0.7);
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00f;
+        }
+        #restart-button:hover, #restart-button-win:hover {
+            background-color: rgba(0, 150, 255, 0.9);
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            font-size: 24px;
+            text-align: center;
+            text-shadow: 0 0 10px #00f, 0 0 20px #00f;
+        }
+        .controls-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            text-align: right;
+            text-shadow: 0 0 5px #00f;
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 1s;
+        }
+        .controls-info.fade {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        Loading Hyperspace Shooter...<br>
+        <small>Please wait while the game initializes</small>
+    </div>
+    
+    <div id="hud">
+        <div>SCORE: <span id="score">0</span> / 25</div>
+        <div>HEALTH: <span id="health">100</span>%</div>
+        <div id="health-bar">
+            <div id="health-fill"></div>
+        </div>
+    </div>
+    
+    <div class="controls-info" id="controls-info">
+        <div>Controls:</div>
+        <div>WASD - Move ship</div>
+        <div>Mouse - Aim</div>
+        <div>Click/Hold - Fire</div>
+    </div>
+    
+    <div id="game-over">
+        GAME OVER
+        <div>
+            <button id="restart-button">RESTART</button>
+        </div>
+    </div>
+    
+    <div id="game-win">
+        MISSION COMPLETE!
+        <div>
+            <button id="restart-button-win">RESTART</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+    <script>
+        // Hide controls info after 5 seconds
+        setTimeout(() => {
+            document.getElementById('controls-info').classList.add('fade');
+        }, 5000);
+    </script>
+</body>
+</html> 
