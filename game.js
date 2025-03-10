@@ -685,11 +685,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ship.rotation.x = Math.PI + targetRotation.x;
         ship.rotation.y = targetRotation.y;
         
-        // Auto-fire if mouse is held down - fire on every frame while mouse is down
-        if (mouseDown && gameActive && !gameWon) {
-            fireTorpedo();
-        }
-        
         // Update stars (hyperspace effect)
         for (let i = 0; i < stars.length; i++) {
             const star = stars[i];
