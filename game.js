@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
     threeScript.onerror = handleError;
     document.head.appendChild(threeScript);
     
+    // Mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     // Initialize game variables
     let scene, camera, renderer;
     let ship, shipLight;
@@ -42,6 +45,12 @@ document.addEventListener('DOMContentLoaded', function() {
         s: false,
         d: false
     };
+    
+    // Mobile touch variables
+    let joystickActive = false;
+    let joystickPosition = { x: 0, y: 0 };
+    let joystickCenter = { x: 0, y: 0 };
+    let lastTorpedoTime = 0;
     
     // Initialize the game
     function initGame() {
@@ -97,6 +106,11 @@ document.addEventListener('DOMContentLoaded', function() {
             window.addEventListener('keydown', onKeyDown);
             window.addEventListener('keyup', onKeyUp);
             
+            // Mobile-specific setup
+            if (isMobile) {
+                setupMobileControls();
+            }
+            
             // Restart button events
             document.getElementById('restart-button').addEventListener('click', resetGame);
             document.getElementById('restart-button-win').addEventListener('click', resetGame);
@@ -110,6 +124,93 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Set up mobile controls
+    function setupMobileControls() {
+        console.log("Setting up mobile controls");
+        
+        // Show mobile controls
+        document.getElementById('mobile-controls').style.display = 'block';
+        document.getElementById('mobile-controls-info').style.display = 'block';
+        
+        // Hide desktop controls info
+        document.getElementById('controls-info').style.display = 'none';
+        
+        // Get joystick elements
+        const joystickArea = document.getElementById('joystick-area');
+        const joystick = document.getElementById('joystick');
+        const fireButton = document.getElementById('fire-button');
+        
+        // Store initial joystick center position
+        const joystickRect = joystickArea.getBoundingClientRect();
+        joystickCenter.x = joystickRect.left + joystickRect.width / 2;
+        joystickCenter.y = joystickRect.top + joystickRect.height / 2;
+        
+        // Joystick touch start event
+        joystickArea.addEventListener('touchstart', function(event) {
+            event.preventDefault();
+            joystickActive = true;
+            updateJoystickPosition(event.touches[0]);
+        });
+        
+        // Joystick touch move event
+        joystickArea.addEventListener('touchmove', function(event) {
+            event.preventDefault();
+            if (joystickActive) {
+                updateJoystickPosition(event.touches[0]);
+            }
+        });
+        
+        // Joystick touch end event
+        joystickArea.addEventListener('touchend', function(event) {
+            event.preventDefault();
+            joystickActive = false;
+            
+            // Reset joystick position
+            joystick.style.transform = 'translate(-50%, -50%)';
+            joystickPosition = { x: 0, y: 0 };
+        });
+        
+        // Fire button event
+        fireButton.addEventListener('touchstart', function(event) {
+            event.preventDefault();
+            if (gameActive && !gameWon) {
+                fireTorpedo();
+            }
+        });
+        
+        // Function to update joystick position
+        function updateJoystickPosition(touch) {
+            // Calculate touch position relative to joystick center
+            const touchX = touch.clientX;
+            const touchY = touch.clientY;
+            
+            // Calculate joystick displacement
+            let dx = touchX - joystickCenter.x;
+            let dy = touchY - joystickCenter.y;
+            
+            // Calculate distance from center
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Limit joystick movement radius
+            const maxRadius = joystickArea.clientWidth / 2 - joystick.clientWidth / 2;
+            if (distance > maxRadius) {
+                dx = dx * maxRadius / distance;
+                dy = dy * maxRadius / distance;
+            }
+            
+            // Update joystick visual position
+            joystick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            
+            // Normalize joystick position for ship control (values between -1 and 1)
+            joystickPosition.x = dx / maxRadius;
+            joystickPosition.y = dy / maxRadius;
+            
+            // Update ship rotation based on joystick position
+            targetRotation.y = joystickPosition.x * 0.5;
+            targetRotation.x = joystickPosition.y * 0.5;
+        }
+    }
+    
     // Reset game state
     function resetGame() {
         // Reset game state
@@ -119,6 +220,14 @@ document.addEventListener('DOMContentLoaded', function() {
         gameWon = false;
         asteroidSpeedMultiplier = 1;
         asteroidSpawnInterval = 2000;
+        
+        // Reset mobile controls if on mobile
+        if (isMobile) {
+            joystickActive = false;
+            joystickPosition = { x: 0, y: 0 };
+            const joystick = document.getElementById('joystick');
+            joystick.style.transform = 'translate(-50%, -50%)';
+        }
         
         // Clear existing objects
         for (let i = asteroids.length - 1; i >= 0; i--) {
@@ -517,6 +626,14 @@ document.addEventListener('DOMContentLoaded', function() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Update joystick center position for mobile
+        if (isMobile) {
+            const joystickArea = document.getElementById('joystick-area');
+            const joystickRect = joystickArea.getBoundingClientRect();
+            joystickCenter.x = joystickRect.left + joystickRect.width / 2;
+            joystickCenter.y = joystickRect.top + joystickRect.height / 2;
+        }
     }
     
     // Handle mouse movement
@@ -670,12 +787,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateGame(deltaTime) {
         if (!gameActive) return;
         
-        // Ship movement with keyboard
+        // Ship movement with keyboard or joystick
         const moveSpeed = 0.1;
-        if (keys.w) ship.position.y += moveSpeed;
-        if (keys.s) ship.position.y -= moveSpeed;
-        if (keys.a) ship.position.x -= moveSpeed;
-        if (keys.d) ship.position.x += moveSpeed;
+        
+        if (isMobile && joystickActive) {
+            // Mobile joystick movement
+            ship.position.x += joystickPosition.x * moveSpeed * 2;
+            ship.position.y -= joystickPosition.y * moveSpeed * 2;
+        } else {
+            // Desktop keyboard movement
+            if (keys.w) ship.position.y += moveSpeed;
+            if (keys.s) ship.position.y -= moveSpeed;
+            if (keys.a) ship.position.x -= moveSpeed;
+            if (keys.d) ship.position.x += moveSpeed;
+        }
         
         // Clamp ship position
         ship.position.x = Math.max(-5, Math.min(5, ship.position.x));

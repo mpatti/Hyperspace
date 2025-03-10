@@ -95,6 +95,82 @@
         .controls-info.fade {
             opacity: 0;
         }
+        
+        /* Mobile controls - hidden by default */
+        #mobile-controls {
+            display: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            pointer-events: none; /* Container doesn't block clicks */
+        }
+        #joystick-area {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            border-radius: 60px;
+            background-color: rgba(0, 100, 255, 0.2);
+            border: 2px solid rgba(100, 150, 255, 0.5);
+            pointer-events: auto; /* Allow touch events */
+            touch-action: none; /* Prevent default touch actions */
+        }
+        #joystick {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background-color: rgba(50, 150, 255, 0.7);
+            border: 2px solid rgba(150, 200, 255, 0.8);
+            box-shadow: 0 0 10px rgba(0, 100, 255, 0.5);
+        }
+        #fire-button {
+            position: absolute;
+            bottom: 50px;
+            right: 50px;
+            width: 80px;
+            height: 80px;
+            border-radius: 40px;
+            background-color: rgba(255, 50, 50, 0.7);
+            border: 2px solid rgba(255, 150, 150, 0.8);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            pointer-events: auto; /* Allow touch events */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+        }
+        
+        #mobile-controls-info {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            text-align: center;
+            text-shadow: 0 0 5px #00f;
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 1s;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+        #mobile-controls-info.fade {
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
@@ -118,6 +194,18 @@
         <div>Click/Hold - Fire</div>
     </div>
     
+    <!-- Mobile touch controls -->
+    <div id="mobile-controls">
+        <div id="joystick-area">
+            <div id="joystick"></div>
+        </div>
+        <div id="fire-button">FIRE</div>
+    </div>
+    
+    <div id="mobile-controls-info">
+        Left: Move | Right: Fire
+    </div>
+    
     <div id="game-over">
         GAME OVER
         <div>
@@ -137,6 +225,9 @@
         // Hide controls info after 5 seconds
         setTimeout(() => {
             document.getElementById('controls-info').classList.add('fade');
+            if (document.getElementById('mobile-controls-info').style.display !== 'none') {
+                document.getElementById('mobile-controls-info').classList.add('fade');
+            }
         }, 5000);
     </script>
 </body>
