@@ -75,6 +75,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create spaceship
             createShip();
             
+            // Position ship at the bottom middle of screen
+            ship.position.set(0, -2.5, 0);
+            
             // Create initial stars
             createStars();
             
@@ -84,7 +87,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Event listeners
             window.addEventListener('resize', onWindowResize);
             window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mousedown', () => mouseDown = true);
+            window.addEventListener('mousedown', () => {
+                mouseDown = true;
+                if (gameActive && !gameWon) {
+                    fireTorpedo();
+                }
+            });
             window.addEventListener('mouseup', () => mouseDown = false);
             window.addEventListener('keydown', onKeyDown);
             window.addEventListener('keyup', onKeyUp);
@@ -677,8 +685,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ship.rotation.x = Math.PI + targetRotation.x;
         ship.rotation.y = targetRotation.y;
         
-        // Auto-fire if mouse is held down
-        if (mouseDown && Date.now() % 200 < 20) {
+        // Auto-fire if mouse is held down - fire on every frame while mouse is down
+        if (mouseDown && gameActive && !gameWon) {
             fireTorpedo();
         }
         
